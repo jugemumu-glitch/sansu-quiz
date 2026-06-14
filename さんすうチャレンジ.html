@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算数チャレンジ！ 5年生</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Noto+Sans+JP:wght@400;700;900&display=swap');
+  :root{--sky:#7c3aed;--sun:#f59e0b;--earth:#059669;--red:#dc2626;--accent:#db2777;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:linear-gradient(160deg,#1e1b4b 0%,#312e81 55%,#4c1d95 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.7) 0%,transparent 100%),radial-gradient(1px 1px at 30% 40%,rgba(255,255,255,.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 55% 10%,rgba(255,255,255,.8) 0%,transparent 100%),radial-gradient(1px 1px at 75% 25%,rgba(255,255,255,.6) 0%,transparent 100%),radial-gradient(1px 1px at 85% 70%,rgba(255,255,255,.5) 0%,transparent 100%);pointer-events:none;z-index:0;}
+  .app{position:relative;z-index:1;width:100%;max-width:540px;}
+  .header{text-align:center;margin-bottom:20px;}
+  .header h1{font-family:'Kaisei Decol',serif;font-size:clamp(1.6rem,6vw,2.2rem);color:#fff;text-shadow:0 0 20px rgba(124,58,237,.8),0 2px 4px rgba(0,0,0,.5);letter-spacing:.05em;}
+  .header .sub{font-size:.85rem;color:#c4b5fd;margin-top:4px;letter-spacing:.1em;}
+  .status-bar{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:10px 18px;margin-bottom:20px;backdrop-filter:blur(10px);}
+  .stat-item{display:flex;align-items:center;gap:6px;color:#ede9fe;font-size:.85rem;font-weight:700;}
+  .stat-icon{font-size:1.1rem;}
+  .stat-val{color:#fbbf24;font-size:1rem;}
+  .divider{width:1px;height:20px;background:rgba(255,255,255,.2);}
+  .progress-wrap{flex:1;}
+  .progress-bar-bg{height:8px;background:rgba(255,255,255,.15);border-radius:50px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#f59e0b);border-radius:50px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+  .card{background:rgba(245,243,255,.97);border-radius:24px;padding:28px 24px;box-shadow:0 8px 40px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.2);animation:cardIn .35s cubic-bezier(.4,0,.2,1);}
+  @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .q-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .q-badge{background:var(--sky);color:#fff;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:50px;letter-spacing:.08em;}
+  .q-num{font-size:.82rem;color:#64748b;margin-left:auto;font-weight:700;}
+  .question-text{font-size:clamp(1.2rem,4vw,1.5rem);font-weight:900;color:#1e1b4b;line-height:1.7;margin-bottom:8px;text-align:center;padding:16px;background:#ede9fe;border-radius:16px;}
+  .question-hint{font-size:.82rem;color:#6d28d9;margin-bottom:20px;text-align:center;font-weight:700;padding:4px 0;}
+  .text-input-wrap{display:flex;flex-direction:column;gap:10px;}
+  .text-input{width:100%;padding:14px 16px;border:2px solid #ddd6fe;border-radius:14px;font-family:'Noto Sans JP',sans-serif;font-size:1.4rem;font-weight:900;color:#1e1b4b;outline:none;transition:border-color .18s;text-align:center;}
+  .text-input:focus{border-color:var(--sky);}
+  .text-input.correct{border-color:var(--earth);background:#d1fae5;}
+  .text-input.wrong{border-color:var(--red);background:#fee2e2;}
+  .submit-btn{padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:1.1rem;font-weight:900;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(124,58,237,.4);}
+  .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,58,237,.5);}
+  .submit-btn:disabled{background:#94a3b8;box-shadow:none;cursor:default;}
+  .feedback{margin-top:14px;padding:12px 16px;border-radius:12px;font-size:.95rem;font-weight:700;line-height:1.6;display:none;}
+  .feedback.show{display:block;animation:fadeIn .25s;}
+  .feedback.correct-fb{background:#d1fae5;color:#065f46;border-left:4px solid var(--earth);}
+  .feedback.wrong-fb{background:#fee2e2;color:#991b1b;border-left:4px solid var(--red);}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .back-btn{margin-top:12px;width:100%;padding:10px;border:2px dashed #fca5a5;border-radius:14px;background:transparent;color:#dc2626;font-family:'Noto Sans JP',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .18s;display:none;}
+  .back-btn.show{display:block;animation:fadeIn .25s;}
+  .back-btn:hover{background:#fff1f2;border-color:#dc2626;}
+  .skip-btn{margin-top:10px;width:100%;padding:10px;border:2px dashed #cbd5e1;border-radius:14px;background:transparent;color:#94a3b8;font-family:'Noto Sans JP',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .18s;}
+  .skip-btn:hover{background:#f8fafc;border-color:#94a3b8;color:#64748b;}
+  .skip-btn:disabled{opacity:.3;cursor:default;}
+  .teach-btn{margin-top:12px;width:100%;padding:11px;border:2px dashed #6ee7b7;border-radius:14px;background:transparent;color:#059669;font-family:'Noto Sans JP',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .18s;}
+  .teach-btn:hover:not(:disabled){background:#ecfdf5;border-color:#059669;}
+  .teach-btn:disabled{opacity:.4;cursor:default;}
+  .teach-area{margin-top:10px;padding:14px 16px;border-radius:12px;background:#ecfdf5;border-left:4px solid var(--earth);color:#065f46;font-size:.9rem;font-weight:700;line-height:1.9;display:none;}
+  .teach-area.show{display:block;animation:fadeIn .25s;}
+  .next-btn{margin-top:16px;width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--sun),var(--accent));color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;letter-spacing:.05em;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(245,158,11,.4);display:none;}
+  .next-btn.show{display:block;animation:fadeIn .3s .1s both;}
+  .next-btn:hover{transform:translateY(-2px);}
+  .result-screen{display:none;text-align:center;padding:10px 0;}
+  .result-screen.show{display:block;animation:cardIn .4s;}
+  .result-trophy{font-size:4rem;margin-bottom:10px;}
+  .result-title{font-family:'Kaisei Decol',serif;font-size:1.8rem;color:#1e1b4b;font-weight:700;margin-bottom:6px;}
+  .result-score{font-size:1rem;color:#475569;margin-bottom:20px;}
+  .result-score strong{color:var(--earth);font-size:1.4rem;}
+  .point-badge{display:inline-block;background:linear-gradient(135deg,var(--sun),var(--accent));color:#fff;font-size:1.5rem;font-weight:900;padding:14px 36px;border-radius:50px;box-shadow:0 6px 24px rgba(245,158,11,.5);margin-bottom:24px;animation:pulse 1.5s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  .point-note{font-size:.85rem;color:#64748b;margin-bottom:24px;}
+  .restart-btn{padding:14px 40px;border:none;border-radius:50px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);transition:transform .15s;}
+  .restart-btn:hover{transform:translateY(-2px);}
+  .start-screen{text-align:center;padding:10px 0;}
+  .start-screen .hero-icon{font-size:4rem;margin-bottom:12px;}
+  .start-screen h2{font-family:'Kaisei Decol',serif;font-size:1.5rem;color:#1e1b4b;margin-bottom:10px;}
+  .rule-list{text-align:left;background:#f5f3ff;border-radius:14px;padding:14px 18px;margin-bottom:24px;}
+  .rule-list li{font-size:.88rem;color:#334155;line-height:2;list-style:none;padding-left:4px;}
+  .start-btn{padding:15px 50px;border:none;border-radius:50px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-family:'Noto Sans JP',sans-serif;font-size:1.1rem;font-weight:900;cursor:pointer;box-shadow:0 6px 24px rgba(124,58,237,.5);letter-spacing:.08em;transition:transform .15s;}
+  .start-btn:hover{transform:translateY(-2px);}
+  .category-badge{display:inline-block;background:#ede9fe;color:#6d28d9;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:50px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🔢 算数チャレンジ！</h1>
+    <div class="sub">小学5年生 · 計算問題</div>
+  </div>
+  <div class="card" id="startScreen">
+    <div class="start-screen">
+      <div class="hero-icon">✏️</div>
+      <h2>ルール説明</h2>
+      <ul class="rule-list">
+        <li>🎯 全部で <strong>30問</strong> 出題されます（毎回ランダムな数字！）</li>
+        <li>✅ 全問正解すると <strong>50ポイント</strong> もらえます</li>
+        <li>🔢 答えを数字で入力して「答える」を押そう</li>
+        <li>↩ 「もどる」ボタンで前の問題にもどれます</li>
+        <li>⏭ わからない問題はスキップできます</li>
+        <li>📖 「おしえて！」ボタンで解き方を見られます</li>
+      </ul>
+      <button class="start-btn" onclick="startQuiz()">スタート！</button>
+    </div>
+  </div>
+  <div id="quizArea" style="display:none;">
+    <div class="status-bar">
+      <div class="stat-item"><span class="stat-icon">✅</span><span>正解</span><span class="stat-val" id="correctCount">0</span></div>
+      <div class="divider"></div>
+      <div class="stat-item"><span class="stat-icon">⭐</span><span>PT</span><span class="stat-val" id="pointCount">0</span></div>
+      <div class="divider"></div>
+      <div class="progress-wrap"><div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div></div>
+      <div class="stat-item"><span class="stat-val" id="qProgress">0/30</span></div>
+    </div>
+    <div class="card" id="quizCard">
+      <div class="q-meta">
+        <span class="q-badge" id="qCatBadge">整数の計算</span>
+        <span class="q-num" id="qNumLabel">第 1 問</span>
+      </div>
+      <div class="question-text" id="questionText"></div>
+      <div class="question-hint" id="questionHint"></div>
+      <div class="text-input-wrap">
+        <input class="text-input" id="textInput" type="text" inputmode="decimal" placeholder="答えを入力" autocomplete="off">
+        <button class="submit-btn" id="submitBtn" onclick="submitAnswer()">答える ✓</button>
+      </div>
+      <button class="back-btn" id="backBtn" onclick="goBack()">↩ 前の問題にもどる</button>
+      <button class="skip-btn" id="skipBtn" onclick="skipQuestion()">⏭ この問題をスキップする</button>
+      <button class="teach-btn" id="teachBtn" onclick="showTeach()">🙋 おしえて！</button>
+      <div class="teach-area" id="teachArea"></div>
+      <div class="feedback" id="feedbackArea"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次の問題へ →</button>
+    </div>
+  </div>
+  <div class="card" id="resultScreen" style="display:none;">
+    <div class="result-screen show">
+      <div class="result-trophy" id="resultTrophy">🏆</div>
+      <div class="result-title" id="resultTitle">おめでとう！</div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="point-badge" id="pointBadge">＋50 ポイント！</div>
+      <div class="point-note" id="pointNote"></div>
+      <button class="restart-btn" onclick="restartQuiz()">もう一度チャレンジ！</button>
+    </div>
+  </div>
+</div>
+<script>
+// ===== 問題生成関数（5年生算数） =====
+
+function r(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+// 分数の最大公約数
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+// 分数を約分して文字列に
+function fracStr(n,d){const g=gcd(Math.abs(n),Math.abs(d));return (n/g)+'/'+(d/g);}
+// 分数の答えを正規化（約分）
+function normFrac(n,d){const g=gcd(Math.abs(n),Math.abs(d));return {n:n/g,d:d/g};}
+
+const GENERATORS = [
+  // 1. 整数×整数（2桁×2桁）
+  ()=>{
+    const a=r(12,99),b=r(12,99);
+    return {
+      cat:'かけ算',
+      q:`${a} × ${b} = ?`,
+      hint:'筆算でといてみよう',
+      ans:[(a*b).toString()],
+      explain:`${a} × ${b} を筆算で計算しよう！
+${a} × ${Math.floor(b/10)*10} = ${a*Math.floor(b/10)*10}
+${a} × ${b%10} = ${a*(b%10)}
+たすと ${a*b} だよ。`
+    };
+  },
+  // 2. 整数÷整数（割り切れる）
+  ()=>{
+    const b=r(2,25),ans=r(2,50);const a=b*ans;
+    return {
+      cat:'わり算',
+      q:`${a} ÷ ${b} = ?`,
+      hint:'何をかければ'+a+'になるか考えよう',
+      ans:[ans.toString()],
+      explain:`${a} ÷ ${b} = ？
+${b} × ? = ${a} と考えよう。
+${b} × ${ans} = ${a} だから、答えは ${ans} だよ！`
+    };
+  },
+  // 3. 小数のたし算
+  ()=>{
+    const a=(r(1,99)/10).toFixed(1),b=(r(1,99)/10).toFixed(1);
+    const ans=Math.round((parseFloat(a)+parseFloat(b))*10)/10;
+    return {
+      cat:'小数のたし算',
+      q:`${a} + ${b} = ?`,
+      hint:'小数点の位置をそろえて計算しよう',
+      ans:[ans.toString()],
+      explain:`${a} + ${b}
+小数点の位置をそろえて計算しよう。
+  ${a}
++) ${b}
+─────
+  ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 4. 小数の引き算
+  ()=>{
+    let a=(r(10,99)/10).toFixed(1),b=(r(1,50)/10).toFixed(1);
+    if(parseFloat(a)<parseFloat(b)){[a,b]=[b,a];}
+    const ans=Math.round((parseFloat(a)-parseFloat(b))*10)/10;
+    return {
+      cat:'小数の引き算',
+      q:`${a} - ${b} = ?`,
+      hint:'小数点の位置をそろえて計算しよう',
+      ans:[ans.toString()],
+      explain:`${a} - ${b}
+小数点の位置をそろえて計算しよう。
+  ${a}
+-) ${b}
+─────
+  ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 5. 小数×整数
+  ()=>{
+    const a=(r(1,99)/10).toFixed(1),b=r(2,9);
+    const ans=Math.round(parseFloat(a)*b*10)/10;
+    return {
+      cat:'小数×整数',
+      q:`${a} × ${b} = ?`,
+      hint:'小数点を一時的に取り除いて計算しよう',
+      ans:[ans.toString()],
+      explain:`${a} × ${b}
+いったん ${a} を10倍して ${Math.round(parseFloat(a)*10)} にして計算しよう。
+${Math.round(parseFloat(a)*10)} × ${b} = ${Math.round(parseFloat(a)*10)*b}
+最後に10でわると → ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 6. 小数÷整数
+  ()=>{
+    const b=r(2,5);const ans=r(1,20);const a=(ans*b/10*10/10).toFixed(1);
+    return {
+      cat:'小数÷整数',
+      q:`${a} ÷ ${b} = ?`,
+      hint:'小数点を動かして考えよう',
+      ans:[(parseFloat(a)/b).toFixed(1)],
+      explain:`${a} ÷ ${b}
+${a} を10倍すると ${Math.round(parseFloat(a)*10)}。
+${Math.round(parseFloat(a)*10)} ÷ ${b} = ${Math.round(parseFloat(a)*10)/b}
+最後に10でわると → ${(parseFloat(a)/b).toFixed(1)}
+答えは ${(parseFloat(a)/b).toFixed(1)} だよ！`
+    };
+  },
+  // 7. 分数のたし算（同分母）
+  ()=>{
+    const d=r(3,12);const n1=r(1,d-1),n2=r(1,d-1);
+    const nAns=n1+n2;
+    let ansStr,explain;
+    if(nAns>=d){
+      const whole=Math.floor(nAns/d);const rem=nAns%d;
+      ansStr=rem===0?whole.toString():`${whole}と${rem}/${d}`;
+      const f=normFrac(rem,d);
+      ansStr=rem===0?whole.toString():`${whole}と${f.n}/${f.d}`;
+      explain=`${n1}/${d} + ${n2}/${d}
+分母が同じときは分子だけたすよ！
+(${n1}+${n2})/${d} = ${nAns}/${d} = ${ansStr}`;
+    } else {
+      const f=normFrac(nAns,d);
+      ansStr=f.d===1?f.n.toString():`${f.n}/${f.d}`;
+      explain=`${n1}/${d} + ${n2}/${d}
+分母が同じときは分子だけたすよ！
+(${n1}+${n2})/${d} = ${nAns}/${d}`;
+      if(f.d!==d) explain+=` = ${ansStr}（約分）`;
+    }
+    return {
+      cat:'分数のたし算',
+      q:`${n1}/${d} + ${n2}/${d} = ?`,
+      hint:'分母が同じときは分子だけ計算するよ',
+      ans:[ansStr,`${nAns}/${d}`],
+      explain:explain+'\n答えは '+ansStr+' だよ！'
+    };
+  },
+  // 8. 分数の引き算（同分母）
+  ()=>{
+    const d=r(4,12);const n1=r(2,d),n2=r(1,n1-1);
+    const nAns=n1-n2;
+    const f=normFrac(nAns,d);
+    const ansStr=f.d===1?f.n.toString():`${f.n}/${f.d}`;
+    return {
+      cat:'分数の引き算',
+      q:`${n1}/${d} - ${n2}/${d} = ?`,
+      hint:'分母が同じときは分子だけ引くよ',
+      ans:[ansStr,`${nAns}/${d}`],
+      explain:`${n1}/${d} - ${n2}/${d}
+分母が同じときは分子だけひくよ！
+(${n1}-${n2})/${d} = ${nAns}/${d}
+答えは ${ansStr} だよ！`
+    };
+  },
+  // 9. 整数の四則混合（括弧あり）
+  ()=>{
+    const a=r(2,9),b=r(2,9),c=r(2,9);
+    const ans=(a+b)*c;
+    return {
+      cat:'四則混合',
+      q:`(${a} + ${b}) × ${c} = ?`,
+      hint:'（　）の中を先に計算しよう',
+      ans:[ans.toString()],
+      explain:`(${a} + ${b}) × ${c}
+まずカッコの中を計算しよう！
+${a} + ${b} = ${a+b}
+次に ${a+b} × ${c} = ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 10. 整数の四則混合（引き算×）
+  ()=>{
+    const b=r(2,8),c=r(2,8);const a=r(b*c+1,b*c+20);
+    const ans=a-b*c;
+    return {
+      cat:'四則混合',
+      q:`${a} - ${b} × ${c} = ?`,
+      hint:'×（かけ算）を先に計算しよう',
+      ans:[ans.toString()],
+      explain:`${a} - ${b} × ${c}
+かけ算を先に計算するよ！
+${b} × ${c} = ${b*c}
+次に ${a} - ${b*c} = ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 11. 面積（長方形）
+  ()=>{
+    const w=r(3,20),h=r(3,20);
+    return {
+      cat:'面積',
+      q:`たて ${h} cm、よこ ${w} cm の長方形の面積は？（cm²）`,
+      hint:'長方形の面積 = たて × よこ',
+      ans:[(w*h).toString()],
+      explain:`長方形の面積 = たて × よこ
+${h} × ${w} = ${h*w}
+答えは ${h*w} cm² だよ！`
+    };
+  },
+  // 12. 面積（三角形）
+  ()=>{
+    const base=r(2,20)*2,height=r(2,20)*2;// 偶数にして割り切れるように
+    const ans=base*height/2;
+    return {
+      cat:'面積',
+      q:`底辺 ${base} cm、高さ ${height} cm の三角形の面積は？（cm²）`,
+      hint:'三角形の面積 = 底辺 × 高さ ÷ 2',
+      ans:[ans.toString()],
+      explain:`三角形の面積 = 底辺 × 高さ ÷ 2
+${base} × ${height} ÷ 2
+= ${base*height} ÷ 2
+= ${ans}
+答えは ${ans} cm² だよ！`
+    };
+  },
+  // 13. 面積（平行四辺形）
+  ()=>{
+    const base=r(3,20),height=r(3,20);
+    return {
+      cat:'面積',
+      q:`底辺 ${base} cm、高さ ${height} cm の平行四辺形の面積は？（cm²）`,
+      hint:'平行四辺形の面積 = 底辺 × 高さ',
+      ans:[(base*height).toString()],
+      explain:`平行四辺形の面積 = 底辺 × 高さ
+${base} × ${height} = ${base*height}
+答えは ${base*height} cm² だよ！`
+    };
+  },
+  // 14. 面積（台形）
+  ()=>{
+    const a=r(3,15),b=r(a+1,20),h=r(2,15)*2;
+    const ans=(a+b)*h/2;
+    return {
+      cat:'面積',
+      q:`上底 ${a} cm、下底 ${b} cm、高さ ${h} cm の台形の面積は？（cm²）`,
+      hint:'台形の面積 = (上底 + 下底) × 高さ ÷ 2',
+      ans:[ans.toString()],
+      explain:`台形の面積 = (上底 + 下底) × 高さ ÷ 2
+(${a} + ${b}) × ${h} ÷ 2
+= ${a+b} × ${h} ÷ 2
+= ${(a+b)*h} ÷ 2
+= ${ans}
+答えは ${ans} cm² だよ！`
+    };
+  },
+  // 15. 体積（直方体）
+  ()=>{
+    const l=r(2,10),w=r(2,10),h=r(2,10);
+    return {
+      cat:'体積',
+      q:`たて ${l} cm、よこ ${w} cm、高さ ${h} cm の直方体の体積は？（cm³）`,
+      hint:'直方体の体積 = たて × よこ × 高さ',
+      ans:[(l*w*h).toString()],
+      explain:`直方体の体積 = たて × よこ × 高さ
+${l} × ${w} × ${h}
+= ${l*w} × ${h}
+= ${l*w*h}
+答えは ${l*w*h} cm³ だよ！`
+    };
+  },
+  // 16. 体積（立方体）
+  ()=>{
+    const s=r(2,10);
+    return {
+      cat:'体積',
+      q:`1辺が ${s} cm の立方体の体積は？（cm³）`,
+      hint:'立方体の体積 = 1辺 × 1辺 × 1辺',
+      ans:[(s*s*s).toString()],
+      explain:`立方体の体積 = 1辺 × 1辺 × 1辺
+${s} × ${s} × ${s}
+= ${s*s} × ${s}
+= ${s*s*s}
+答えは ${s*s*s} cm³ だよ！`
+    };
+  },
+  // 17. 割合（何倍か）
+  ()=>{
+    const base=r(2,10)*5,rate=r(2,6);const ans=base*rate;
+    return {
+      cat:'割合',
+      q:`${base} の ${rate} 倍は？`,
+      hint:'もとの数 × 倍数 で求めるよ',
+      ans:[ans.toString()],
+      explain:`${base} の ${rate} 倍
+= ${base} × ${rate}
+= ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 18. 割合（百分率）
+  ()=>{
+    const base=r(1,20)*50;
+    const percents=[10,20,25,50,75];
+    const pct=percents[r(0,percents.length-1)];
+    const ans=base*pct/100;
+    return {
+      cat:'割合（%）',
+      q:`${base} の ${pct}% は？`,
+      hint:`${pct}% = ${pct}/100 だよ`,
+      ans:[ans.toString()],
+      explain:`${base} の ${pct}%
+= ${base} × ${pct}/100
+= ${base} × 0.${pct.toString().padStart(2,'0')}
+= ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 19. 割合（歩合）
+  ()=>{
+    const base=r(1,20)*100;
+    const rates=[2,3,4,5,6,7,8];
+    const rate=rates[r(0,rates.length-1)];
+    const ans=base*rate/10;
+    return {
+      cat:'割合（歩合）',
+      q:`${base} の ${rate} 割は？`,
+      hint:`${rate}割 = ${rate}/10 = ${rate*10}% だよ`,
+      ans:[ans.toString()],
+      explain:`${base} の ${rate}割
+= ${base} × ${rate}/10
+= ${base} × 0.${rate}
+= ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 20. 速さ（距離÷時間）
+  ()=>{
+    const speed=r(2,10)*5,time=r(1,4);const dist=speed*time;
+    return {
+      cat:'速さ',
+      q:`${dist} km を ${time} 時間で走ったときの速さは？（km/時）`,
+      hint:'速さ = 距離 ÷ 時間',
+      ans:[speed.toString()],
+      explain:`速さ = 距離 ÷ 時間
+= ${dist} ÷ ${time}
+= ${speed}
+答えは ${speed} km/時 だよ！`
+    };
+  },
+  // 21. 速さ（距離＝速さ×時間）
+  ()=>{
+    const speed=r(2,12)*5,time=r(1,5);const dist=speed*time;
+    return {
+      cat:'速さ',
+      q:`時速 ${speed} km で ${time} 時間進んだときの距離は？（km）`,
+      hint:'距離 = 速さ × 時間',
+      ans:[dist.toString()],
+      explain:`距離 = 速さ × 時間
+= ${speed} × ${time}
+= ${dist}
+答えは ${dist} km だよ！`
+    };
+  },
+  // 22. 速さ（時間＝距離÷速さ）
+  ()=>{
+    const speed=r(2,8)*5,time=r(1,4);const dist=speed*time;
+    return {
+      cat:'速さ',
+      q:`時速 ${speed} km で ${dist} km 進むのに何時間かかる？`,
+      hint:'時間 = 距離 ÷ 速さ',
+      ans:[time.toString()],
+      explain:`時間 = 距離 ÷ 速さ
+= ${dist} ÷ ${speed}
+= ${time}
+答えは ${time} 時間 だよ！`
+    };
+  },
+  // 23. 単位量あたり（人口密度）
+  ()=>{
+    const area=r(2,10)*10,pop=area*r(5,30)*10;
+    const dens=Math.round(pop/area);
+    return {
+      cat:'単位量あたり',
+      q:`面積 ${area} km² に人口 ${pop} 人が住んでいるとき、人口密度は？（人/km²）`,
+      hint:'人口密度 = 人口 ÷ 面積',
+      ans:[dens.toString()],
+      explain:`人口密度 = 人口 ÷ 面積
+= ${pop} ÷ ${area}
+= ${dens}
+答えは ${dens} 人/km² だよ！`
+    };
+  },
+  // 24. 単位量あたり（どちらがこんでいるか）
+  ()=>{
+    const a1=r(2,8)*5,p1=a1*r(4,8);
+    const a2=r(2,8)*5,p2=a2*r(4,8);
+    const d1=p1/a1,d2=p2/a2;
+    const ans=d1>d2?'A':'B';
+    return {
+      cat:'単位量あたり',
+      q:`A：${a1}m² に ${p1} 人、B：${a2}m² に ${p2} 人
+どちらがこんでいますか？（AまたはBで答えよう）`,
+      hint:'1m²あたりの人数を比べてみよう',
+      ans:[ans],
+      explain:`1m²あたりの人数を比べよう。
+A：${p1} ÷ ${a1} = ${d1.toFixed(1)} 人/m²
+B：${p2} ÷ ${a2} = ${d2.toFixed(1)} 人/m²
+${d1.toFixed(1)} ${d1>d2?'>':'<'} ${d2.toFixed(1)} なので
+答えは ${ans} だよ！`
+    };
+  },
+  // 25. 整数の性質（公約数・最大公約数）
+  ()=>{
+    const factors=[2,3,4,6,8,12];
+    const g=factors[r(0,factors.length-1)];
+    const a=g*r(2,8),b=g*r(2,8);
+    return {
+      cat:'整数の性質',
+      q:`${a} と ${b} の最大公約数は？`,
+      hint:'両方を割り切れる一番大きい数を探そう',
+      ans:[g.toString()],
+      explain:`${a} と ${b} の最大公約数
+${a} の約数：${Array.from({length:a},(_,i)=>i+1).filter(x=>a%x===0).join('、')}
+${b} の約数：${Array.from({length:b},(_,i)=>i+1).filter(x=>b%x===0).join('、')}
+共通する最大の数 → ${g}
+答えは ${g} だよ！`
+    };
+  },
+  // 26. 整数の性質（公倍数・最小公倍数）
+  ()=>{
+    const pairs=[[2,3],[2,5],[3,4],[4,6],[3,5],[2,7],[4,5]];
+    const [a,b]=pairs[r(0,pairs.length-1)];
+    let lcm=a;while(lcm%b!==0)lcm+=a;
+    return {
+      cat:'整数の性質',
+      q:`${a} と ${b} の最小公倍数は？`,
+      hint:'両方の倍数になる一番小さい数を探そう',
+      ans:[lcm.toString()],
+      explain:`${a} と ${b} の最小公倍数
+${a} の倍数：${Array.from({length:6},(_,i)=>a*(i+1)).join('、')}…
+${b} の倍数：${Array.from({length:6},(_,i)=>b*(i+1)).join('、')}…
+共通する最小の数 → ${lcm}
+答えは ${lcm} だよ！`
+    };
+  },
+  // 27. 小数×小数
+  ()=>{
+    const a=(r(1,9)/10+r(1,9)).toFixed(1);
+    const b=(r(1,9)/10+1).toFixed(1);
+    const ans=Math.round(parseFloat(a)*parseFloat(b)*100)/100;
+    return {
+      cat:'小数×小数',
+      q:`${a} × ${b} = ?`,
+      hint:'小数点を右にずらして整数にして計算しよう',
+      ans:[ans.toString()],
+      explain:`${a} × ${b}
+${a} を10倍→${Math.round(parseFloat(a)*10)}、${b} を10倍→${Math.round(parseFloat(b)*10)}
+${Math.round(parseFloat(a)*10)} × ${Math.round(parseFloat(b)*10)} = ${Math.round(parseFloat(a)*10)*Math.round(parseFloat(b)*10)}
+100でわると → ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 28. 小数÷小数
+  ()=>{
+    const b=(r(2,5)/10*10/10).toFixed(1);
+    const ans=r(2,20);
+    const a=Math.round(parseFloat(b)*ans*10)/10;
+    return {
+      cat:'小数÷小数',
+      q:`${a.toFixed(1)} ÷ ${b} = ?`,
+      hint:'両方を10倍して整数にしよう',
+      ans:[ans.toString()],
+      explain:`${a.toFixed(1)} ÷ ${b}
+両方10倍すると → ${Math.round(parseFloat(a.toFixed(1))*10)} ÷ ${Math.round(parseFloat(b)*10)}
+= ${ans}
+答えは ${ans} だよ！`
+    };
+  },
+  // 29. 円周・直径
+  ()=>{
+    const r2=r(2,10);const d=r2*2;
+    const circ=Math.round(d*3.14*100)/100;
+    return {
+      cat:'円の計算',
+      q:`直径 ${d} cm の円の円周は？（円周率は3.14、単位cmで答えよう）`,
+      hint:'円周 = 直径 × 3.14',
+      ans:[circ.toString()],
+      explain:`円周 = 直径 × 3.14
+= ${d} × 3.14
+= ${circ}
+答えは ${circ} cm だよ！`
+    };
+  },
+  // 30. 円の面積
+  ()=>{
+    const r2=r(1,8);
+    const area=Math.round(r2*r2*3.14*100)/100;
+    return {
+      cat:'円の計算',
+      q:`半径 ${r2} cm の円の面積は？（円周率は3.14、単位cm²で答えよう）`,
+      hint:'円の面積 = 半径 × 半径 × 3.14',
+      ans:[area.toString()],
+      explain:`円の面積 = 半径 × 半径 × 3.14
+= ${r2} × ${r2} × 3.14
+= ${r2*r2} × 3.14
+= ${area}
+答えは ${area} cm² だよ！`
+    };
+  },
+];
+
+// ===== クイズ管理 =====
+let questions=[], current=0, correct=0, points=0, answered=false, history=[];
+
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+
+function generateQuestions(){
+  // 各カテゴリから満遍なく30問生成
+  const gens=shuffle([...GENERATORS]);
+  const qs=[];
+  // まず各生成関数を1回ずつ使う
+  for(const g of gens){qs.push(g());}
+  // 足りない分はランダム補充
+  while(qs.length<30){qs.push(GENERATORS[Math.floor(Math.random()*GENERATORS.length)]());}
+  return shuffle(qs).slice(0,30);
+}
+
+function startQuiz(){
+  questions=generateQuestions();
+  current=0;correct=0;points=0;answered=false;history=[];
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('quizArea').style.display='block';
+  updateStatus();loadQuestion();
+}
+
+function updateStatus(){
+  document.getElementById('correctCount').textContent=correct;
+  document.getElementById('pointCount').textContent=points;
+  document.getElementById('qProgress').textContent=current+'/30';
+  document.getElementById('progressFill').style.width=(current/30*100)+'%';
+}
+
+function loadQuestion(){
+  answered=false;
+  const q=questions[current];
+  document.getElementById('qNumLabel').textContent='第 '+(current+1)+' 問';
+  document.getElementById('questionText').textContent=q.q;
+  document.getElementById('questionHint').textContent='💡 '+q.hint;
+  document.getElementById('qCatBadge').textContent=q.cat;
+  document.getElementById('feedbackArea').className='feedback';
+  document.getElementById('feedbackArea').textContent='';
+  document.getElementById('nextBtn').className='next-btn';
+  document.getElementById('teachBtn').disabled=false;
+  document.getElementById('teachBtn').textContent='🙋 おしえて！';
+  document.getElementById('teachArea').className='teach-area';
+  document.getElementById('teachArea').textContent='';
+  document.getElementById('skipBtn').disabled=false;
+  document.getElementById('backBtn').className=current>0?'back-btn show':'back-btn';
+  const inp=document.getElementById('textInput');
+  inp.value='';inp.className='text-input';inp.disabled=false;
+  document.getElementById('submitBtn').disabled=false;
+  inp.onkeydown=(e)=>{if(e.key==='Enter')submitAnswer();};
+  setTimeout(()=>inp.focus(),100);
+  const card=document.getElementById('quizCard');
+  card.style.animation='none';card.offsetHeight;
+  card.style.animation='cardIn .35s cubic-bezier(.4,0,.2,1)';
+}
+
+function submitAnswer(){
+  if(answered)return;
+  const q=questions[current];
+  const inp=document.getElementById('textInput');
+  const val=inp.value.trim();
+  if(!val)return;
+  answered=true;inp.disabled=true;
+  document.getElementById('submitBtn').disabled=true;
+  const norm=val.replace(/\s/g,'').toLowerCase();
+  const isCorrect=q.ans.some(a=>a.replace(/\s/g,'').toLowerCase()===norm);
+  if(isCorrect){
+    inp.classList.add('correct');correct++;points+=Math.round(50/30*10)/10;
+    showFeedback(true,'正解！ 🎉');
+  } else {
+    inp.classList.add('wrong');
+    showFeedback(false,'不正解。正しい答えは「'+q.ans[0]+'」だよ。');
+  }
+  history.push({q:current,correct:isCorrect,pts:isCorrect?Math.round(50/30*10)/10:0});
+  updateStatus();
+  document.getElementById('teachBtn').disabled=true;
+  document.getElementById('skipBtn').disabled=true;
+  document.getElementById('backBtn').className='back-btn';
+  document.getElementById('nextBtn').className='next-btn show';
+}
+
+function skipQuestion(){
+  if(answered)return;
+  answered=true;
+  history.push({q:current,correct:false,pts:0,skipped:true});
+  document.getElementById('skipBtn').disabled=true;
+  document.getElementById('teachBtn').disabled=true;
+  document.getElementById('backBtn').className='back-btn';
+  const fb=document.getElementById('feedbackArea');
+  fb.textContent='⏭ スキップしました。';
+  fb.className='feedback show wrong-fb';
+  document.getElementById('nextBtn').className='next-btn show';
+  document.getElementById('textInput').disabled=true;
+  document.getElementById('submitBtn').disabled=true;
+}
+
+function goBack(){
+  if(current===0)return;
+  const last=history.pop();
+  if(last&&last.correct){correct--;points-=last.pts;}
+  current--;updateStatus();loadQuestion();
+}
+
+function showTeach(){
+  const q=questions[current];
+  document.getElementById('teachArea').textContent='📖 '+q.explain;
+  document.getElementById('teachArea').className='teach-area show';
+  document.getElementById('teachBtn').textContent='📖 解き方を見た！';
+  document.getElementById('teachBtn').disabled=true;
+}
+
+function showFeedback(isCorrect,msg){
+  const fb=document.getElementById('feedbackArea');
+  fb.textContent=(isCorrect?'⭕ ':'❌ ')+msg;
+  fb.className='feedback show '+(isCorrect?'correct-fb':'wrong-fb');
+}
+
+function nextQuestion(){
+  current++;
+  if(current>=30){showResult();}else{updateStatus();loadQuestion();}
+}
+
+function showResult(){
+  document.getElementById('quizArea').style.display='none';
+  document.getElementById('resultScreen').style.display='block';
+  const perfect=correct===30;
+  document.getElementById('resultTrophy').textContent=perfect?'🏆':correct>=20?'🌟':'📖';
+  document.getElementById('resultTitle').textContent=perfect?'パーフェクト！！':correct>=20?'よくできました！':'もう一度挑戦しよう！';
+  document.getElementById('resultScore').innerHTML='30問中 <strong>'+correct+'問</strong> 正解';
+  const pts=perfect?50:Math.floor(correct/30*50);
+  document.getElementById('pointBadge').textContent='＋'+pts+' ポイント！';
+  document.getElementById('pointNote').textContent=perfect?'全問正解で満点ボーナス50ポイント獲得！':'正解数に応じて '+pts+' ポイントゲット！全問正解で50ポイントに挑戦しよう！';
+}
+
+function restartQuiz(){
+  document.getElementById('resultScreen').style.display='none';
+  document.getElementById('startScreen').style.display='block';
+}
+</script>
+</body>
+</html>
